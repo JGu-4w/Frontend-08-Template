@@ -1,0 +1,57 @@
+<style>
+  .cell {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    border: 1px solid #fff;
+    background-color: green;
+
+    font-size: 50px;
+    line-height: 100px;
+    vertical-align: middle;
+    text-align: center;
+
+    cursor: default;
+  }
+</style>
+
+<div class="board"></div>
+
+<script>
+  let pattern = [
+    [2, 0, 0],
+    [0, 1, 0],
+    [0, 0, 0]
+  ]
+
+  let color = 1;
+
+  function show() {
+    let board = document.getElementsByClassName('board')[0];
+    // 清空画布
+    board.innerHTML = '';
+    // 渲染九个方格
+    for (let i = 0; i < 3; i++) {
+      for (let j = 0; j < 3; j++) {
+        let cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.innerHTML =
+            pattern[i][j] === 2 ? "❌" :
+            pattern[i][j] === 1 ? "⭕️" : "";
+        cell.addEventListener('click', () => move(i, j));
+        board.appendChild(cell);
+      }
+      board.appendChild(document.createElement('br'));
+    }
+  }
+  // 落子
+  function move(x, y) {
+    if (pattern[x][y] === 0) {
+      pattern[x][y] = color;
+      color = 3 - color;
+      show()
+    }
+  }
+
+  show()
+</script>
