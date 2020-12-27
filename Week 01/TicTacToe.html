@@ -26,9 +26,9 @@
   <div class="tips"></div>
   <script>
     let pattern = [
-      [0, 0, 0],
-      [0, 1, 0],
-      [0, 0, 0]
+      0, 0, 0,
+      0, 1, 0,
+      0, 0, 0
     ]
 
     let color = 2;
@@ -44,8 +44,8 @@
           let cell = document.createElement('div');
           cell.classList.add('cell');
           cell.innerHTML =
-            pattern[i][j] === 2 ? "❌" :
-            pattern[i][j] === 1 ? "⭕️" : "";
+            pattern[i * 3 + j] === 2 ? "❌" :
+            pattern[i * 3 + j] === 1 ? "⭕️" : "";
           cell.addEventListener('click', () => move(i, j));
           board.appendChild(cell);
         }
@@ -56,8 +56,8 @@
     function move(i, j) {
       let tips = document.getElementsByClassName('tips')[0];
       tips.innerHTML = "";
-      if (!pattern[i][j]) {
-        pattern[i][j] = color;
+      if (!pattern[i * 3 + j]) {
+        pattern[i * 3 + j] = color;
         if (check(pattern, color)) {
           end = true;
           alert((color === 2 ? "❌" : "⭕️") + " is the winner");
@@ -75,7 +75,7 @@
       for (let i = 0; i < 3; i++) {
         let win = true;
         for (let j = 0; j < 3; j++) {
-          if (pattern[i][j] !== color) {
+          if (pattern[i * 3 + j] !== color) {
             win = false;
           }
         }
@@ -87,7 +87,7 @@
       for (let i = 0; i < 3; i++) {
         let win = true;
         for (let j = 0; j < 3; j++) {
-          if (pattern[j][i] !== color) {
+          if (pattern[j * 3 + i] !== color) {
             win = false;
           }
         }
@@ -98,7 +98,7 @@
       {
         let win = true;
         for (let i = 0; i < 3; i++) {
-          if (pattern[i][i] !== color) {
+          if (pattern[i * 3 + i] !== color) {
             win = false;
           }
         }
@@ -109,7 +109,7 @@
       {
         let win = true;
         for (let i = 0; i < 3; i++) {
-          if (pattern[i][2 - i] !== color) {
+          if (pattern[i * 3 + (2 - i)] !== color) {
             win = false;
           }
         }
@@ -121,20 +121,20 @@
     }
 
     function clone(pattern) {
-      // return Object.create(pattern);
-      return JSON.parse(JSON.stringify(pattern))
+      return Object.create(pattern);
+      // return JSON.parse(JSON.stringify(pattern))
     }
 
     function willWin(pattern, color) {
       for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          if (pattern[i][j]) {
+          if (pattern[i * 3 + j]) {
             continue;
           }
           let tmp = clone(pattern);
-          tmp[i][j] = color;
+          tmp[i * 3 + j] = color;
           if (check(tmp, color)) {
-            return [i, j];
+            return i * 3 + j;
           }
         }
       }
@@ -153,15 +153,15 @@
       let point = null;
       outer: for (let i = 0; i < 3; i++) {
         for (let j = 0; j < 3; j++) {
-          if (pattern[i][j]) {
+          if (pattern[i * 3 + j]) {
             continue;
           }
           let tmp = clone(pattern);
-          tmp[i][j] = color;
-          let r = bestChoice(tmp,3 - color).result;
+          tmp[i * 3 + j] = color;
+          let r = bestChoice(tmp, 3 - color).result;
           if (-r > result) {
             result = -r;
-            point = [i, j];
+            point = i * 3 + j;
           }
           if (result === 1) {
             break outer;
@@ -170,7 +170,7 @@
       }
       return {
         point: point,
-        result: point ? result : 0
+        result: point || point === 0 ? result : 0
       }
     }
 
