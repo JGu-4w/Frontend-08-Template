@@ -27,11 +27,11 @@
   <script>
     let pattern = [
       0, 0, 0,
-      0, 1, 0,
+      0, 0, 0,
       0, 0, 0
     ]
 
-    let color = 2;
+    let color = 1;
     let end = false;
 
     function show() {
@@ -46,16 +46,16 @@
           cell.innerHTML =
             pattern[i * 3 + j] === 2 ? "❌" :
             pattern[i * 3 + j] === 1 ? "⭕️" : "";
-          cell.addEventListener('click', () => move(i, j));
+          cell.addEventListener('click', () => userMove(i, j));
           board.appendChild(cell);
         }
         board.appendChild(document.createElement('br'));
       }
     }
     // 落子
-    function move(i, j) {
-      let tips = document.getElementsByClassName('tips')[0];
-      tips.innerHTML = "";
+    function userMove(i, j) {
+      // let tips = document.getElementsByClassName('tips')[0];
+      // tips.innerHTML = "";
       if (!pattern[i * 3 + j]) {
         pattern[i * 3 + j] = color;
         if (check(pattern, color)) {
@@ -63,12 +63,26 @@
           alert((color === 2 ? "❌" : "⭕️") + " is the winner");
         }
         color = 3 - color;
-        show()
-        console.log(bestChoice(pattern, color))
-        if (willWin(pattern, color) && !end) {
-          tips.innerHTML = (color === 2 ? "❌" : "⭕️") + " will win";
-        }
+        show();
+        // console.log(bestChoice(pattern, color))
+        // if (willWin(pattern, color) && !end) {
+        //   tips.innerHTML = (color === 2 ? "❌" : "⭕️") + " will win";
+        // }
+        computerMove();
       }
+    }
+
+    function computerMove() {
+      let choice = bestChoice(pattern, color);
+      if (choice.point) {
+        pattern[choice.point[0] * 3 + choice.point[1]] = color;
+      }
+      if (check(pattern, color)) {
+        end = true;
+        alert((color === 2 ? "❌" : "⭕️") + " is the winner");
+      }
+      color = 3 - color;
+      show();
     }
 
     function check(pattern, color) {
@@ -134,7 +148,7 @@
           let tmp = clone(pattern);
           tmp[i * 3 + j] = color;
           if (check(tmp, color)) {
-            return i * 3 + j;
+            return [i, j];
           }
         }
       }
@@ -161,7 +175,7 @@
           let r = bestChoice(tmp, 3 - color).result;
           if (-r > result) {
             result = -r;
-            point = i * 3 + j;
+            point = [i, j];
           }
           if (result === 1) {
             break outer;
@@ -170,7 +184,7 @@
       }
       return {
         point: point,
-        result: point || point === 0 ? result : 0
+        result: point ? result : 0
       }
     }
 
