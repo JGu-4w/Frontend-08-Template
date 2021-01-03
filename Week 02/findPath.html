@@ -75,9 +75,9 @@
 
     async function findPath(map, start, end) {
       // let queue = [start];
-      let queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+      // let queue = new Sorted([start], (a, b) => distance(a) - distance(b));
+      let queue = new MinHeap([start], (a, b) => distance(a) - distance(b));
       let table = Object.create(map);
-      console.log(queue.length);
       async function insert(x, y, pre) {
         // 搜索碰到边界时返回
         if (x < 0 || x >= 100 || y < 0 || y >= 100) {
@@ -104,7 +104,7 @@
       while (queue.length) {
         // let [x, y] = queue.shift();
         let [x, y] = queue.take();
-        console.log(x, y);
+        console.log([x, y])
         if (x === end[0] && y === end[1]) {
           // 终点背景色
           let path = [];
@@ -113,7 +113,7 @@
           while (x !== start[0] && y !== start[1]) {
             path.push(map[x * 100 + y]);
             [x, y] = table[x * 100 + y];
-            await sleep(30);
+            await sleep(5);
             container.children[x * 100 + y].style.backgroundColor = 'pink';
           }
           return path;
@@ -167,6 +167,72 @@
 
       get length() {
         return this.arr.length;
+      }
+    }
+    // 二叉堆(小顶堆)
+    class MinHeap {
+      constructor(arr, compare) {
+        this.heap = [];
+        this.compare = compare || ((a, b) => a - b);
+        arr.forEach(h => {
+          this.give(h);
+        });
+      }
+      take() {
+        // 返回堆顶，将最后一个节点置于顶部向下找到合适位置
+        const min = this.heap[0];
+        if (this.heap.length > 1) {
+          this.heap[0] = this.heap.pop();
+          this.shiftDown(0);
+        } else {
+          this.heap.pop();
+        }
+        return min;
+      }
+      give(v) {
+        this.heap.push(v);
+        this.shiftUp(this.heap.length - 1);
+      }
+      get length() {
+        return this.heap.length;
+      }
+      getParentIndex(i) {
+        // 二进制计算方式求商
+        return (i - 1) >> 1;
+      }
+      getLeftChildIndex(i) {
+        return i * 2 + 1;
+      }
+      getRightChildIndex(i) {
+        return i * 2 + 2;
+      }
+      swap(a, b) {
+        const tmp = this.heap[a];
+        this.heap[a] = this.heap[b];
+        this.heap[b] = tmp;
+      }
+      // 由下往上寻找新加入节点的合适位置
+      shiftUp(i) {
+        if (i === 0) {
+          return;
+        }
+        const parentIndex = this.getParentIndex(i);
+        if (this.compare(this.heap[i], this.heap[parentIndex]) < 0) {
+          this.swap(i, parentIndex);
+          this.shiftUp(parentIndex);
+        }
+      }
+      shiftDown(i) {
+        const left = this.getLeftChildIndex(i);
+        const right = this.getRightChildIndex(i);
+        if (this.heap[left] && this.compare(this.heap[left], this.heap[i]) < 0) {
+          this.swap(left, i);
+          this.shiftDown(left);
+        }
+        if (this.heap[right] && this.compare(this.heap[right], this.heap[i]) < 0) {
+          this.swap(right, i);
+          this.shiftDown(right);
+        }
       }
     }
   </script>
