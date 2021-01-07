@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LL Algorithm</title>
+</head>
+
+<body>
+  <script>
+    let regExp = /([0-9\.]+)|([ \t]+)|([\n\r]+)|(\*)|(\/)|(\+)|(\-)/g;
+    let dictionary = ['Number', 'whitespace', 'LineTiminator', '*', '/', '+', '-'];
+
+    function* tokenize(source) {
+      let res;
+      let lastIndex = 0;
+      while (true) {
+        lastIndex = regExp.lastIndex;
+        res = regExp.exec(source)
+        if (!res) {
+          break;
+        }
+        // 此次匹配后的索引与上一次的匹配到的索引相减，看是否为此次匹配的结果长度
+        // 若超过长度则视为出现了规则之外的字符，直接跳过
+        if (regExp.lastIndex - lastIndex > res[0].length) {
+          break;
+        }
+        let token = {
+          type: null,
+          value: null
+        }
+        for (let i = 1; i < dictionary.length; i++) {
+          if (res[i]) {
+            token.type = dictionary[i - 1];
+          }
+        }
+        token.value = res[0];
+        yield token;
+      }
+    }
+
+    for (let token of tokenize('1024 + 5 * 9')) {
+      console.log(token)
+    }
+
+  </script>
+</body>
+
+</html>
