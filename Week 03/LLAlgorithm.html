@@ -38,12 +38,63 @@
         token.value = res[0];
         yield token;
       }
+      yield {
+        type: "EOF"
+      }
     }
 
-    for (let token of tokenize('1024 + 5 * 9')) {
-      console.log(token)
+    function MultiplicativeExpression(source) {
+      // 若source[0]为Number，即可能为单独Number或者后接乘号或除号
+      if (source[0].type === 'Number') {
+        let node = {
+          type: 'MultiplicativeExpression',
+          children: [source[0]]
+        }
+        source[0] = node;
+        return MultiplicativeExpression(source);
+      }
+      // 处理乘号
+      if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '*') {
+        let node = {
+          type: 'MultiplicativeExpression',
+          operator: '*',
+          children: []
+        };
+        // 取出source中乘号和乘号左右两侧的数字
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        return MultiplicativeExpression(source);
+      }
+      // 处理除号
+      if (source[0].type === 'MultiplicativeExpression' && source[1] && source[1].type === '/') {
+        let node = {
+          type: 'MultiplicativeExpression',
+          operator: '/',
+          children: []
+        };
+        // 取出source中乘号和乘号左右两侧的数字
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        source.unshift(node);
+        return MultiplicativeExpression(source);
+      }
+      if (source[0].type === 'MultiplicativeExpression') {
+        return source[0];
+      }
+      return MultiplicativeExpression(source);
     }
 
+    let source = []
+    for (let token of tokenize('10 * 25 / 2')) {
+      if (token.type !== 'whitespace' && token.type !== 'LineTiminator') {
+        source.push(token)
+      }
+    }
+
+    console.log(MultiplicativeExpression(source))
   </script>
 </body>
 
