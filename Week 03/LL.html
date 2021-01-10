@@ -44,6 +44,11 @@
     }
 
     function MultiplicativeExpression(source) {
+      // 产生式的三种可能
+      // <MultiplicativeExpression>::=
+      //    <Number>
+      //    |<MultiplicativeExpression><*><Number>
+      //    |<MultiplicativeExpression></><Number>
       // 若source[0]为Number，即可能为单独Number或者后接乘号或除号
       if (source[0].type === 'Number') {
         let node = {
@@ -87,14 +92,76 @@
       return MultiplicativeExpression(source);
     }
 
+    function AdditiveExpression(source) {
+      // 产生式的五种可能
+      // <AdditiveExpression>::=
+      //    <Number>
+      //    |<MultiplicativeExpression><*><Number>
+      //    |<MultiplicativeExpression></><Number>
+      //    |<AdditiveExpression><+><MultiplicativeExpression>
+      //    |<AdditiveExpression><-><MultiplicativeExpression>
+      if (source[0].type === 'MultiplicativeExpression') {
+        let node = {
+          type: 'AdditiveExpression',
+          children: [source[0]]
+        }
+        source[0] = node;
+        return AdditiveExpression(source)
+      }
+      if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '+') {
+        let node = {
+          type: 'AdditiveExpression',
+          operator: '+',
+          children: []
+        }
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        MultiplicativeExpression(source); // 加号后可能为MultiplicativeExpression
+        node.children.push(source.shift());
+        source.unshift(node);
+        return AdditiveExpression(source)
+      }
+      if (source[0].type === 'AdditiveExpression' && source[1] && source[1].type === '-') {
+        let node = {
+          type: 'AdditiveExpression',
+          operator: '-',
+          children: []
+        }
+        node.children.push(source.shift());
+        node.children.push(source.shift());
+        MultiplicativeExpression(source); // 加号后可能为MultiplicativeExpression
+        node.children.push(source.shift());
+        source.unshift(node);
+        return AdditiveExpression(source)
+      }
+      if (source[0].type === 'AdditiveExpression') {
+        return source[0];
+      }
+      MultiplicativeExpression(source);
+      return AdditiveExpression(source);
+    }
+
+    function Expression(source) {
+      if (source[0].type === "AdditiveExpression" && source[1] && source[1].type === 'EOF') {
+        let node = {
+          type: 'Expression',
+          children: [source.shift(), source.shift()]
+        }
+        source.unshift(node);
+        return node;
+      }
+      AdditiveExpression(source);
+      return Expression(source)
+    }
+
     let source = []
-    for (let token of tokenize('10 * 25 / 2')) {
+    for (let token of tokenize('1 * 2 + 3')) {
       if (token.type !== 'whitespace' && token.type !== 'LineTiminator') {
         source.push(token)
       }
     }
 
-    console.log(MultiplicativeExpression(source))
+    console.log(Expression(source))
   </script>
 </body>
 
