@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trie</title>
+</head>
+
+<body>
+  <script>
+    let $ = Symbol("$");
+    // 字典树：处理大量字符
+    class Trie {
+      constructor() {
+        this.root = Object.create(null);
+      }
+      // 从单词的第一个字符开始搜索字典
+      // 若当前字符存在于字典，则指向该字符；否则将字符添加到字典中
+      // 为了区分已完结的单词和未完结的单词，在已完结单词后添加 $ 标记，并以此记录单词出现次数
+      insert(word) {
+        let node = this.root;
+        for (let c of word) {
+          if (!node[c]) {
+            node[c] = Object.create(null);
+          }
+          node = node[c];
+        }
+        if (!($ in node)) {
+          node[$] = 0;
+        }
+        node[$]++;
+      }
+      // 查询出现次数最多的单词
+      // 使用递归循环遍历字典中的每个字符，查找出node[$]最大的单词
+      // visit()中的第二个参数为每次递归寻找到的字符组合，为了最后找出出现次数最多的完整单词
+      most() {
+        let max = 0;
+        let maxWord = null;
+        let visit = (node, word) => {
+          if (node[$] && node[$] > max) {
+            max = node[$];
+            maxWord = word;
+          }
+          for (let p in node) {
+            visit(node[p], word + p);
+          }
+        }
+        visit(this.root, "");
+        console.log(max, maxWord);
+      }
+    }
+
+    function randomWorld(length) {
+      let s = "";
+      for (let i = 0; i < length; i++) {
+        s += String.fromCharCode(Math.random() * 26 + "a".charCodeAt(0));
+      }
+      return s;
+    }
+
+    let trie = new Trie();
+
+    for (let i = 0; i < 10000; i++) {
+      trie.insert(randomWorld(4));
+    }
+  </script>
+</body>
+
+</html>
