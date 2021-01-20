@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proxy</title>
+</head>
+
+<body>
+  <script>
+    let callbacks = [];
+
+    let object = {
+      a: 1,
+      b: 2
+    }
+
+    let po = reactive(object);
+    // 存在严重性能问题，callbacks为全局数组，每次调用都要执行一遍
+    effect(() => {
+      console.log(po.a);
+    })
+
+    function effect(callback) {
+      callbacks.push(callback);
+    }
+
+    function reactive(object) {
+      return new Proxy(object, {
+        // proxy的set在po对象被赋值是进行捕获
+        set(obj, prop, val) {
+          obj[prop] = val;
+          for (let callback of callbacks) {
+            callback();
+          }
+          return obj[prop];
+        },
+        // 获取对象值同理
+        get(obj, prop) {
+          console.log(obj, prop);
+          return obj[prop];
+        }
+      })
+    }
+  </script>
+</body>
+
+</html>
