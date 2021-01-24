@@ -9,7 +9,10 @@
 
 <body>
   <script>
-    let callbacks = [];
+    // let callbacks = [];
+    let callbacks = new Map();
+
+    let usedReactivities = [];
 
     let object = {
       a: 1,
@@ -18,12 +21,27 @@
 
     let po = reactive(object);
     // 存在严重性能问题，callbacks为全局数组，每次调用都要执行一遍
+    // 执行了 effect() 触发了reactive对象的get方法，将触发的obj和prop存入usedReactivities中
     effect(() => {
       console.log(po.a);
     })
 
     function effect(callback) {
-      callbacks.push(callback);
+      // callbacks.push(callback);
+      usedReactivities = [];
+      callback();
+      console.log(usedReactivities);
+
+      for (let reactivity of usedReactivities) {
+        // 防止插入相同的键值, reactivity为[obj, prop]
+        if (!callbacks.has(reactivity)) {
+          callbacks.set(reactivity[0], new Map());
+        }
+        if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
+          callbacks.get(reactivity[0]).set(reactivity[1], []);
+        }
+        callbacks.get(reactivity[0]).get(reactivity[1]).push(callback);
+      }
     }
 
     function reactive(object) {
@@ -31,14 +49,23 @@
         // proxy的set在po对象被赋值是进行捕获
         set(obj, prop, val) {
           obj[prop] = val;
-          for (let callback of callbacks) {
-            callback();
+          // 由于Map存在索引，不需要循环整个callbacks，只抽取绑定该prop对应的callback执行
+          if (callbacks.has(obj)) {
+            if (callbacks.get(obj).has(prop)) {
+              for (let callback of callbacks.get(obj).get(prop)) {
+                callback();
+              }
+            }
           }
+          // for (let callback of callbacks) {
+          //   callback();
+          // }
           return obj[prop];
         },
         // 获取对象值同理
         get(obj, prop) {
-          console.log(obj, prop);
+          // console.log(obj, prop);
+          usedReactivities.push([obj, prop]);
           return obj[prop];
         }
       })
