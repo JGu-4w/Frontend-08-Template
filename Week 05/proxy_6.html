@@ -8,6 +8,11 @@
 </head>
 
 <body>
+  <input id="r" type="range" min=0 max=255>
+  <input id="g" type="range" min=0 max=255>
+  <input id="b" type="range" min=0 max=255>
+  <div id="color" style="width:100px;height:100px"></div>
+
   <script>
     let callbacks = new Map();
     // 全局表格，为了解决初版proxy无法进行深度监听
@@ -16,22 +21,38 @@
     let usedReactivities = [];
 
     let object = {
-      // a: 1,
-      a: { b: 3 },
-      b: 2
-    }
+      r: 0,
+      g: 0,
+      b: 0
+    };
 
     let po = reactive(object);
     // 存在严重性能问题，callbacks为全局数组，每次调用都要执行一遍
     // 执行了 effect() 触发了reactive对象的get方法，将触发的obj和prop存入usedReactivities中
+    // 单向绑定
     effect(() => {
-      console.log(po.a.b);
+      document.getElementById("r").value = po.r;
+    });
+    effect(() => {
+      document.getElementById("g").value = po.g;
+    });
+    effect(() => {
+      document.getElementById("b").value = po.b;
+    });
+
+    document.getElementById("r").addEventListener("input", event => po.r = event.target.value);
+    document.getElementById("g").addEventListener("input", event => po.g = event.target.value);
+    document.getElementById("b").addEventListener("input", event => po.b = event.target.value);
+
+    effect(() => {
+      document.getElementById("color").style.backgroundColor = `rgb(${po.r}, ${po.g}, ${po.b})`;
     })
 
     function effect(callback) {
       // callbacks.push(callback);
       usedReactivities = [];
       callback();
+      console.log(usedReactivities);
 
       for (let reactivity of usedReactivities) {
         // 防止插入相同的键值, reactivity为[obj, prop]

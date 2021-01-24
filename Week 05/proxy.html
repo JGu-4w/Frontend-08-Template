@@ -34,7 +34,7 @@
 
       for (let reactivity of usedReactivities) {
         // 防止插入相同的键值, reactivity为[obj, prop]
-        if (!callbacks.has(reactivity)) {
+        if (!callbacks.has(reactivity[0])) {
           callbacks.set(reactivity[0], new Map());
         }
         if (!callbacks.get(reactivity[0]).has(reactivity[1])) {
