@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    class Human {
+      constructor(name = 'A') {
+        this.name = name;
+        this.hp = 100;  // 生命值
+      }
+      hurt(damage) {
+        // 受到伤害后剩余的生命值
+        this.hp -= damage;
+        console.log(`${this.name} 受到 ${damage} 点伤害，剩余血量为 ${this.hp}`);
+      }
+    }
+
+    class Dog {
+      constructor(power = 10) {
+        this.power = power;
+      }
+      bite() {
+        // 造成的伤害
+        return this.power;
+      }
+    }
+
+    const human = new Human('路人甲');
+    const dog = new Dog(5);
+    human.hurt(dog.bite());
+  </script>
+</body>
+
+</html>
