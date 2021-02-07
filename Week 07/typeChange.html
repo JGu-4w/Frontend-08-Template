@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function stringToNumber(str) {
+      if (str.startsWith('0x') || str.startsWith('0X')) {
+        return parseInt(str.substring(2), 16);
+      } else if (str.startsWith('0o') || str.startsWith('0O')) {
+        return parseInt(str.substring(2), 8);
+      } else if (str.startsWith('0b') || str.startsWith('0B')) {
+        return parseInt(str.substring(2), 2);
+      } else {
+        return Number(str);
+      }
+    }
+
+    function numberToString(num, radix) {
+      return num.toString(radix);
+    }
+  </script>
+</body>
+
+</html>
