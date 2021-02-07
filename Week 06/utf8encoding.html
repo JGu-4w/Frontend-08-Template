@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    function UTF8_Encoding(string) {
+      let bytes = [];
+      for (ch of string) {
+        let utf8 = [];
+        const charCode = ch.codePointAt();
+        const binary = charCode.toString(2);
+        if (charCode >= 65536 && charCode <= 1114111) {
+          // 4个字节: 0x10000 ~ 0x10FFFF, 65536 ~ 1114111
+          // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx, 共有21个x
+          // 转化为二进制不满21位时在前面补0
+          const _binary = binary.padStart(21, 0);
+          utf8.push(parseInt(`11110${_binary.substring(0, 3)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(3, 9)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(9, 15)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(15)}`, 2).toString(16));
+        } else if (charCode >= 2048 && charCode <= 65535) {
+          // 3个字节: 0x800 ~ 0xFFFF 2048 ~ 65535
+          // 1110xxxx 10xxxxxx 10xxxxxx, 共有16个x
+          // 转化为二进制不满16位时在前面补0
+          const _binary = binary.padStart(16, 0);
+          utf8.push(parseInt(`1110${_binary.substring(0, 4)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(4, 10)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(10)}`, 2).toString(16));
+        } else if (charCode >= 128 && charCode <= 2047) {
+          // 2个字节: 0x80 ~ 0x7FF 128 ~ 2047
+          // 110xxxxx 10xxxxxx, 共有11个x
+          // 转化为二进制不满11位时在前面补0
+          const _binary = binary.padStart(11, 0);
+          utf8.push(parseInt(`110${_binary.substring(0, 5)}`, 2).toString(16));
+          utf8.push(parseInt(`10${_binary.substring(5)}`, 2).toString(16));
+        } else {
+          // 1个字节: 0x00 ~ 0x7F 0 ~ 127
+          // 0xxxxxxx, 共有7个x
+          utf8.push(charCode.toString(16));
+        }
+        bytes.push(utf8);
+      }
+      return bytes;
+    }
+  </script>
+</body>
+
+</html>
