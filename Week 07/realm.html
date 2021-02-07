@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <div id="container"></div>
+  <script src="https://gw.alipayobjects.com/os/antv/pkg/_antv.g6-3.7.1/dist/g6.min.js"></script>
+  <script>
+    function renderG6(data) {
+      const graph = new G6.TreeGraph({
+        container: 'container',
+        width: document.documentElement.clientWidth,
+        height: document.documentElement.clientHeight,
+        linkCenter: true,
+        modes: {
+          default: [
+            'collapse-expand',
+            'drag-canvas',
+            'zoom-canvas',
+          ],
+        },
+        defaultNode: {
+          size: 26,
+        },
+        defaultEdge: {
+          type: 'cubic-horizontal',
+        },
+        layout: {
+          type: 'dendrogram',
+          direction: 'LR',
+          nodeSep: 20,
+          rankSep: 100,
+          radial: true,
+        },
+      });
+
+      graph.node(function (node) {
+        return {
+          label: node.id,
+        };
+      });
+
+      graph.data(data);
+      graph.render();
+      graph.fitView();
+    }
+
+    function getAllObject() {
+      //获取所有自身对象的属性名
+      const names = Object.getOwnPropertyNames(this);
+      const map = new Map();
+      for (let name of names) {
+        if (this[name]?.prototype) {
+          // 若存在原型
+          const prop = this[name].prototype.__proto__;
+
+          if (prop) {
+            // map中没有存入该对象属性
+            if (!map.has(prop)) {
+              map.set(prop, []);
+            }
+            // map中存在该对象属性但是没有该属性名
+            if (!map.get(prop).includes(this[name])) {
+              map.get(prop).push(this[name]);
+            }
+          }
+        }
+      }
+      function getChildren(root) {
+        if (map.has(root)) {
+          return map
+            .get(root)
+            .map((r) => ({
+              id: r.name,
+              label: r.name,
+              children: getChildren(r.prototype),
+            }))
+            .filter((r) => r.id);
+        }
+        return [];
+      }
+
+      return {
+        id: "Object",
+        label: "Object",
+        children: getChildren(Object.prototype),
+      };
+    }
+
+    const data = getAllObject();
+    renderG6(data);
+  </script>
+</body>
+
+</html>
