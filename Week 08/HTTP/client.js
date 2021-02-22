@@ -137,7 +137,7 @@ class ResponseParser {
       }
     } else if (this.current === this.WAITING_HEADER_BLOCK_END) {
       if (char === '\n') {
-        this.current - this.WAITING_BODY;
+        this.current = this.WAITING_BODY;
       }
     } else if (this.current === this.WAITING_BODY) {
       console.log(char)
