@@ -19,7 +19,7 @@ body div #myid{
 <body>
   <div>
     <img id="myid"/>
-    <img />
+    <img/>
   </div>
 </body>
 </html>`);
