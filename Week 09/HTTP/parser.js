@@ -1,3 +1,4 @@
+const { match } = require('assert');
 const css = require('css');
 
 const EOF = Symbol('EOF'); // EOF: End Of File
@@ -15,8 +16,67 @@ function addCSSRules(text) {
   rules.push(...ast.stylesheet.rules);
 }
 
+function match(element, selector) {
+  if (!selector || !element.attributes) {
+    return false;
+  }
+
+  if (!selector.charAt(0) === "#") {
+    let attr = element.attributes.filter(attr => attr.name === "id")[0]
+    if (attr && attr.value === selector.replace("#", '')) {
+      return true;
+    }
+  } else if (selector.charAt(0) === ".") {
+    let attr = element.attributes.filter(attr => attr.name === "class")[0] 
+    if (attr && attr.value === selector.replace(".", '')) {
+      return true;
+    }
+  } else {
+    if (element.tagName === selector) {
+      return true;
+    }
+  }
+  return false;
+}
+
 function computeCSS(element) {
   let elements = stack.slice().reverse()
+  if (!element.computedStyle) {
+    element.computedStyle = {};
+  }
+
+  for (let rule of rules) {
+    let selectorParts = rule.selectors[0].split(" ").reverse();
+
+    if (!match(element, selectorParts[0])) {
+      continue;
+    }
+
+    let matched = false;
+
+    let j = 1;
+    for (let i = 0; i < elements.length; i++) {
+      if (match(elemetns[i], selectorParts[j])) {
+        j++;
+      }
+    }
+
+    if (j >= selectorParts.length) {
+      matched = true;
+    }
+
+    if (matched) {
+      // 如果匹配到，需要加入
+      let computedStyle = element.computedStyle;
+      for (let declaration of rule.declarations) {
+        if (!computedStyle[declaration.property]) {
+          computedStyle[declaration.property] = {}
+          computedStyle[declaration.property].value = declaration.value;
+        }
+      }
+      console.log(element.computedStyle);
+    }
+  }
 }
 
 function emit(token) {
